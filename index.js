@@ -19,7 +19,7 @@ function start(){
       type: 'list',
       name: 'choices',
       message: 'What action would you like to take?',
-      choices: ['View all Departments', 'View all Roles', 'View all Employees', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Quit']
+      choices: ['View all Departments', 'View all Roles', 'View all Employees', 'View Employees by Manager', 'View Employees by Department', 'View the combined salaries of a Department', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', "Update an Employee's Manager", 'Delete a Department', 'Delete a Role', 'Delete an Employee', 'Quit']
     }
   ]).then((res) => {
     switch (res.choices) {
@@ -91,7 +91,7 @@ function viewEmployees(){
 // //***Bonus***
 // //View Employees by Manager
 // //View Employees by Department
-// //View combined salaries of deparartmental employees
+// //View combined salaries of a deparartment's employees
 
 //"POST" Routes
 //This will allow the user to create a department
