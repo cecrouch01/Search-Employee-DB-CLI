@@ -282,8 +282,38 @@ async function updateEmployeeRole() {
 //***Bonus***
 //Update Employee Managers
 async function updateEmployeeManager(){
-
-}
+  try {
+    let employeesData = await db.promise().query('SELECT id, concat(first_name, " ", last_name) AS name FROM employee;');
+    let managerData = await db.promise().query('SELECT id, concat(first_name, " ", last_name) AS name, role_id FROM employee WHERE role_id = 3 OR role_id = 5 OR role_id = 7 OR role_id = 10 OR role_id = 13;');
+    let employees = employeesData[0].map((employee) => ({
+      name: employee.name,
+      value: employee.id
+    }));
+      let managers = managerData[0].map((data) => ({
+        name: data.name,
+        value: data.id
+      }));
+    let userInput = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employeeName',
+        message: 'Which employee has a new manager?',
+        choices: employees
+      },
+      {
+        type:'list',
+        name: 'updatedManager',
+        message: "Who is the employee's new manager?",
+        choices: managers
+      }
+    ])
+    await db.promise().query('UPDATE employee SET manager_id = ? WHERE id = ?;', [userInput.updatedManager, userInput.employeeName])
+    console.log("Updated employee's manager");
+    start();
+  } catch(err){
+    console.error(err)
+  };
+};
 
 //***Bonus***
 //"DELETE" ROUTES
