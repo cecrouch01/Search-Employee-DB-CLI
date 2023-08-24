@@ -13,6 +13,7 @@ const db = mysql.createConnection(
   console.log('Connected to the database')
 );
 
+//This starts the CLI function
 function start(){
   inquirer.prompt([
     {
@@ -71,6 +72,7 @@ function start(){
     }
   })
 }
+
 //"GET" Routes used:
 //This will let the user view all departments with their id.
 function viewDepartments(){ 
@@ -108,7 +110,6 @@ function viewEmployees(){
     start();
   });
 };
-
 //View Employees by Manager
 async function viewEmployeesByManager(){
   const employeeInfo = await db.promise().query('SELECT emp.id AS id, concat(emp.first_name," ", emp.last_name) AS employee_name, title AS job_title, salary, department_name, concat(mngr.first_name," ", mngr.last_name) AS manager_name FROM employee AS emp LEFT JOIN employee AS mngr ON emp.manager_id = mngr.id LEFT JOIN roles ON emp.role_id = roles.id LEFT JOIN department on roles.department_id = department.id ORDER BY mngr.id DESC;')
@@ -146,7 +147,6 @@ function addDepartment(){
       })
     })
 };
-
 //This will allow for the user to create a role
 function addRole(){
   db.query('SELECT * FROM department', (err, data) => {
@@ -185,7 +185,6 @@ function addRole(){
     })
   })
 }
-
 //This will allow for the user to create an employee
 async function addEmployee(){
   try {
@@ -279,7 +278,6 @@ async function updateEmployeeRole() {
     console.error(err)
   };
 };
-//***Bonus***
 //Update Employee Managers
 async function updateEmployeeManager(){
   try {
@@ -315,19 +313,75 @@ async function updateEmployeeManager(){
   };
 };
 
-//***Bonus***
 //"DELETE" ROUTES
 //Delete Departments
 async function deleteDepartment(){
-
-}
+  try{  
+    let listOfDepartment = await db.promise().query('SELECT * FROM department;')
+    let departments = listOfDepartment[0].map((department) => ({
+        name: department.department_name,
+        value: department.id
+    }))
+    let userInput = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'deletedDepartment',
+        message: 'What Department would you like to delete?',
+        choices: departments
+      }
+    ])
+    await db.promise().query('DELETE from department WHERE id = ?;', [userInput.deletedDepartment])
+    console.log('The Department has been deleted')
+    start()
+  } catch(err) {
+    console.error(err)
+  }
+} 
 //Delete Roles
 async function deleteRole(){
-
+  try {
+    let listOfRoles = await db.promise().query('SELECT * FROM roles;');
+    let roles = listOfRoles[0].map((role) => ({
+      name: role.title,
+      value: role.id
+    }));
+    let userInput = await inquirer.prompt([
+     {
+      type: 'list',
+      name: 'deleteRole',
+      message: 'What Role would you like to delete?',
+      choices: roles
+     }
+    ]);
+    await db.promise().query('DELETE FROM roles WHERE id = ?;', [userInput.deleteRole]);
+    console.log('The Role has been deleted');
+    start();
+  } catch(err) {
+    console.error(err)
+  }
 }
 //Delete Employees
 async function deleteEmployee(){
-
+ try {
+  let listofEmployees = await db.promise().query('SELECT id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee;')
+  let employees = listofEmployees[0].map((employee) => ({
+    name: employee.employee_name,
+    value: employee.id
+  }));
+  let userInput = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'deletedEmployee',
+      message: 'Which employee would you like to delete?',
+      choices: employees
+    }
+  ]);
+  await db.promise().query('DELETE FROM employee WHERE id = ?;', [userInput.deletedEmployee]);
+  console.log('The employee has been deleted');
+  start();
+ } catch(err){
+  console.log(err)
+ }
 }
 
 start();
