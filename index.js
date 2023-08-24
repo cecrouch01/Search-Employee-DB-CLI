@@ -53,7 +53,7 @@ function start(){
 //"GET" Routes used:
 //This will let the user view all departments with their id.
 function viewDepartments(){ 
-  const sql = 'SELECT * from department';
+  const sql = 'SELECT * from department;';
     
     db.query(sql, (err, data) => {
       if(err) {
@@ -67,7 +67,7 @@ function viewDepartments(){
 
 // //This will view the job title, role id, the department that the role belongs to, and the salary for that role from the "Role Table"
 function viewRoles(){
-  const sql = 'SELECT roles.id as id, title as job_title, salary, department_name FROM roles LEFT JOIN department ON roles.department_id = department.id';
+  const sql = 'SELECT roles.id as id, title as job_title, salary, department_name FROM roles LEFT JOIN department ON roles.department_id = department.id;';
 
   db.query(sql, (err, data) => {
     if(err) throw err
@@ -103,7 +103,7 @@ function addDepartment(){
         message: 'What Department would you like to add?',
       }
     ]).then((res) => {
-      const sql = `INSERT INTO department (department_name) VALUES (?)`
+      const sql = `INSERT INTO department (department_name) VALUES (?);`
       db.query(sql, res.Department, (err, data) => {
         if(err) throw err
         console.log(`Added ${res.Department} to database`)
@@ -154,8 +154,8 @@ function addRole(){
 //This will allow for the user to create an employee
 async function addEmployee(){
   try {
-    let rolesData = await db.promise().query('SELECT * FROM roles')
-    let managerData = await db.promise().query('SELECT concat(first_name, " ", last_name) AS name, role_id FROM employee WHERE role_id = 3 OR role_id = 5 OR role_id = 7 OR role_id = 10 OR role_id = 13')
+    let rolesData = await db.promise().query('SELECT * FROM roles;')
+    let managerData = await db.promise().query('SELECT concat(first_name, " ", last_name) AS name, role_id FROM employee WHERE role_id = 3 OR role_id = 5 OR role_id = 7 OR role_id = 10 OR role_id = 13;')
     let roles = rolesData[0].map((data) => ({
       name: data.title,
       value: data.id
@@ -205,13 +205,45 @@ async function addEmployee(){
     start();
       
   } catch(err) {
-    console.error(`this is in error ${err}`)
-  }
-
-}
+    console.error(err)
+  };
+};
 
 //"PUT" Routes
 //Update an employee role
+async function updateEmployeeRole() {
+  try{
+    let employeesData = await db.promise().query('SELECT id, concat(first_name, " ", last_name) AS name FROM employee;');
+    let rolesData = await db.promise().query('SELECT id, title FROM roles;')
+    let employees = employeesData[0].map((employee) => ({
+      name: employee.name,
+      value: employee.id
+    }))
+    let roles = rolesData[0].map((role) => ({
+      name: role.title,
+      value: role.id
+    }))
+    let userInput = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'employeeName',
+        message: "Which employee's role do you want to update?",
+        choices: employees
+      },
+      {
+        type: 'list',
+        name: 'updatedRole',
+        message: "What is the employee's new role?",
+        choices: roles
+      }
+    ])
+    await db.promise().query('UPDATE employee SET role_id = ? WHERE id = ?;', [userInput.updatedRole, userInput.employeeName])
+    console.log(`Updated employee's role`)
+    start();
+  } catch(err) {
+    console.error(err)
+  };
+};
 //***Bonus***
 //Update Employee Managers
 
