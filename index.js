@@ -32,6 +32,15 @@ function start(){
       case 'View all Employees':
         viewEmployees()
         break;
+      case 'View Employees by Manager':
+        viewEmployeesByManager()
+        break;
+      case 'View Employees by Department':
+        viewEmployeesByDepartment()
+        break;
+      case 'View the combined salaries of a Department':
+        viewCombinedSalaries()
+        break;
       case 'Add Department':
         addDepartment()
         break;
@@ -43,6 +52,18 @@ function start(){
         break;
       case 'Update Employee Role':
         updateEmployeeRole()
+        break;
+      case "Update an Employee's Manager":
+        updateEmployeeManager()
+        break;
+      case 'Delete a Department':
+        deleteDepartment()
+        break;
+      case 'Delete a Role':
+        deleteRole()
+        break;
+      case 'Delete an Employee':
+        deleteEmployee()
         break;
       default: 
         db.end()
@@ -88,10 +109,24 @@ function viewEmployees(){
   });
 };
 
-// //***Bonus***
-// //View Employees by Manager
-// //View Employees by Department
-// //View combined salaries of a deparartment's employees
+//View Employees by Manager
+async function viewEmployeesByManager(){
+  const employeeInfo = await db.promise().query('SELECT emp.id AS id, concat(emp.first_name," ", emp.last_name) AS employee_name, title AS job_title, salary, department_name, concat(mngr.first_name," ", mngr.last_name) AS manager_name FROM employee AS emp LEFT JOIN employee AS mngr ON emp.manager_id = mngr.id LEFT JOIN roles ON emp.role_id = roles.id LEFT JOIN department on roles.department_id = department.id ORDER BY mngr.id DESC;')
+  console.table(employeeInfo[0]);
+  start();
+}
+//View Employees by Department
+async function viewEmployeesByDepartment(){
+  const employeeInfoDept = await db.promise().query('SELECT emp.id AS id, concat(emp.first_name," ", emp.last_name) AS employee_name, title AS job_title, salary, department_name, concat(mngr.first_name," ", mngr.last_name) AS manager_name FROM employee AS emp LEFT JOIN employee AS mngr ON emp.manager_id = mngr.id LEFT JOIN roles ON emp.role_id = roles.id LEFT JOIN department on roles.department_id = department.id ORDER BY department.id DESC;')
+  console.table(employeeInfoDept[0])
+  start();
+}
+//View combined salaries of a deparartment's employees
+async function viewCombinedSalaries(){
+  const combinedSalary = await db.promise().query('SELECT department_name, SUM(salary) FROM roles LEFT JOIN department ON department_id = department.id GROUP BY department_id;');
+  console.table(combinedSalary[0]);
+  start();
+}
 
 //"POST" Routes
 //This will allow the user to create a department
@@ -246,12 +281,23 @@ async function updateEmployeeRole() {
 };
 //***Bonus***
 //Update Employee Managers
+async function updateEmployeeManager(){
+
+}
 
 //***Bonus***
 //"DELETE" ROUTES
 //Delete Departments
-//Delete Roles
-//Delete Employees
+async function deleteDepartment(){
 
+}
+//Delete Roles
+async function deleteRole(){
+
+}
+//Delete Employees
+async function deleteEmployee(){
+
+}
 
 start();
